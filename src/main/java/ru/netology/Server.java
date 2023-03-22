@@ -73,13 +73,22 @@ public class Server {
                 return;
             }
             System.out.println(method);
+            System.out.println(requestLine[1]);
 
-            final var path = requestLine[1];
+           final String path;
+           final String query;
+            if(requestLine[1].contains("?")) {
+                path = requestLine[1].substring(requestLine[1].indexOf('/'), requestLine[1].indexOf('?'));
+                query = requestLine[1];
+            } else {
+                path = requestLine[1];
+                query = null;
+            }
+
             if (!path.startsWith("/")) {
                 badRequest(out);
                 return;
             }
-            System.out.println(path);
 
             // ищем заголовки
             final var headersDelimiter = new byte[]{'\r', '\n', '\r', '\n'};
@@ -97,7 +106,7 @@ public class Server {
 
             final var headersBytes = in.readNBytes(headersEnd - headersStart);
             final var headers = Arrays.asList(new String(headersBytes).split("\r\n"));
-            final var request = new Request(method, path, headers, null);
+            final var request = new Request(method, path, query, headers, null);
             System.out.println(request);
 
             // для GET тела нет
